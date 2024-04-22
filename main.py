@@ -29,7 +29,25 @@ cloudiness_translation = {
     'tornado': 'Торнадо',
     'light intensity drizzle': 'Грибной дождик'
 }
-
+weather_photos = {
+    'clear sky': 'yasno.jpeg',
+    'light rain': 'malenki_dozhd.jpg',
+    'few clouds': 'malooblachno.jpg',
+    'scattered clouds': 'rasseyannie_oblaka.jpeg',
+    'broken clouds': 'oblachno_s_proyasneniyami.jpg',
+    'overcast clouds': 'pasmurno.jpeg',
+    'mist': 'tuman.jpeg',
+    'smoke': 'dyimka.jpeg',
+    'haze': 'mgla.jpeg',
+    'dust': 'pilno.jpeg',
+    'fog': 'tuman.jpeg',
+    'sand': 'pilno.jpeg',
+    'ash': 'pepl.jpeg',
+    'squall': 'shkval.jpeg',
+    'tornado': 'tornado.jpeg',
+    'light intensity drizzle': 'malenki_dozhd.jpg',
+    'error': 'errorimg.jpeg'
+}
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
 
@@ -44,6 +62,7 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(content_types=[types.ContentType.TEXT, types.ContentType.LOCATION])
 async def get_weather(message: types.Message):
+    chat_id = message['chat']['id']
     if message.content_type == types.ContentType.TEXT:
         city = message.text.capitalize()
 
@@ -91,15 +110,19 @@ async def get_weather(message: types.Message):
         weather_content = f"\nОблачность: {weather_description_ru}\nТемпература: {temperature}°C\nВлажность: {humidity}%\nМестное время: {formatted_local_time}\nСодержание азота в воздухе: {air_NO2_amount}\nИндекс качества воздуха: {air_quality_points}"
         if message.content_type == types.ContentType.TEXT:
             weather_message = f"Погода в городе {city}: {weather_content}"
+            weather_photo = weather_photos[weather_description]
         else:  # Если пользователь отправил локацию
             weather_message = f"Погода в вашем текущем местоположении: {weather_content}"
+            weather_photo = weather_photos[weather_description]
     else:
         if message.content_type == types.ContentType.TEXT:
             weather_message = 'Такого города в реале не существует, только в ваших мыслях...\n＞﹏＜'
+            weather_photo = weather_photos['error']
         else:  # Если пользователь отправил локацию
             weather_message = 'Не удалось получить погоду для вашего текущего местоположения.'
+            weather_photo = weather_photos['error']
 
     await message.reply(weather_message)
-
+    await bot.send_photo(chat_id, photo=open(f'Weather_photos/{weather_photo}', 'rb'))
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
