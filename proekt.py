@@ -25,7 +25,8 @@ cloudiness_translation = {
     'sand': 'Песок',
     'ash': 'Пепел',
     'squall': 'Шквалистая погода',
-    'tornado': 'Торнадо'
+    'tornado': 'Торнадо',
+    'light intensity drizzle': 'Грибной дождик'
 }
 
 bot = Bot(token=BOT_TOKEN)
@@ -47,7 +48,7 @@ async def get_weather(message: types.Message):
 
         params = {
             'q': city,
-            'appid': OPENWEATHERMAP_API_KEY,
+            'appid': OPENWEATHERMAP_API_KEY, 
             'units': 'metric'
         }
     else:  # Если пользователь отправил локацию
