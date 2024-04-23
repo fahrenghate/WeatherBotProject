@@ -102,12 +102,23 @@ async def get_weather(message: types.Message):
         formatted_local_time = local_time.strftime('%d.%m.%Y %H:%M:%S')
         air_quality_points = air_data["overall_aqi"]
         air_NO2_amount = air_data["NO2"]["concentration"]
-
+        if air_NO2_amount < 5:
+            air_NO2_text = str(air_NO2_amount) + ' (Низкое содержание)'
+        elif 5 < air_NO2_amount < 10:
+            air_NO2_text = str(air_NO2_amount) + ' (Среднее содержание)'
+        else:
+            air_NO2_text = str(air_quality_points) + ' (Опасное для здоровья)'
+        if air_quality_points < 30:
+            air_quality_text = str(air_quality_points) + ' (Грязный воздух)'
+        elif 30 < air_quality_points < 70:
+            air_quality_text = str(air_quality_points) + ' (Воздух средней чистоты)'
+        else:
+            air_quality_text = str(air_quality_points) + ' (Чистый воздух)'
         if weather_description in cloudiness_translation:
             weather_description_ru = cloudiness_translation[weather_description]
         else:
             weather_description_ru = weather_description
-        weather_content = f"\nОблачность: {weather_description_ru}\nТемпература: {temperature}°C\nВлажность: {humidity}%\nМестное время: {formatted_local_time}\nСодержание азота в воздухе: {air_NO2_amount}\nИндекс качества воздуха: {air_quality_points}"
+        weather_content = f"\nОблачность: {weather_description_ru}\nТемпература: {temperature}°C\nВлажность: {humidity}%\nМестное время: {formatted_local_time}\nСодержание азота в воздухе: {air_NO2_text}\nИндекс качества воздуха: {air_quality_text}"
         if message.content_type == types.ContentType.TEXT:
             weather_message = f"Погода в городе {city}: {weather_content}"
             weather_photo = weather_photos[weather_description]
