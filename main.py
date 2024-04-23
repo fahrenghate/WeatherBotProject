@@ -48,10 +48,12 @@ weather_photos = {
     'light intensity drizzle': 'malenki_dozhd.jpg',
     'error': 'errorimg.jpeg'
 }
+
+#Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
 
-
+#Обработчик команды /start
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -59,17 +61,18 @@ async def send_welcome(message: types.Message):
     keyboard.add(button)
     await message.reply("Привет!🖐 \nЯ бот для определения погоды. Просто отправь мне название города, или нажми кнопку ниже, чтобы отправить свое местоположение.", reply_markup=keyboard)
 
-
+#Обработчик текстовых сообщений или местоположений
 @dp.message_handler(content_types=[types.ContentType.TEXT, types.ContentType.LOCATION])
 async def get_weather(message: types.Message):
     chat_id = message['chat']['id']
+    #Если получено текстовое сообщение, то выбираем город название города
     if message.content_type == types.ContentType.TEXT:
-        city = message.text.capitalize()
+        city = message.text.capitalize()#Каждое название города с большой буквы
 
         weather_params = {
-            'q': city,
-            'appid': OPENWEATHERMAP_API_KEY, 
-            'units': 'metric'
+            'q': city, #Название города
+            'appid': OPENWEATHERMAP_API_KEY,
+            'units': 'metric'#Единица измерения
         }
         air_params = {
             'city': city
@@ -91,13 +94,14 @@ async def get_weather(message: types.Message):
 
     response = requests.get(OPENWEATHERMAP_API_URL, params=weather_params)
     weather_data = response.json()
-    air_response = requests.get(AIR_API_URL, headers={'X-Api-Key': AIR_API_KEY}, params=air_params)
+    air_response = requests.get(
+        AIR_API_URL, headers={'X-Api-Key': AIR_API_KEY}, params=air_params)
     air_data = air_response.json()
     if response.status_code == 200 and air_response.status_code == requests.codes.ok:
-        weather_description = weather_data['weather'][0]['description']
-        temperature = round(weather_data['main']['temp'])
-        humidity = weather_data['main']['humidity']
-        timezone_offset = weather_data['timezone']
+        weather_description = weather_data['weather'][0]['description']#Обработка JSON файла
+        temperature = round(weather_data['main']['temp'])#Температура
+        humidity = weather_data['main']['humidity']#Влажность
+        timezone_offset = weather_data['timezone']#Часовой пояс
         local_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=timezone_offset)
         formatted_local_time = local_time.strftime('%d.%m.%Y %H:%M:%S')
         air_quality_points = air_data["overall_aqi"]
@@ -114,6 +118,7 @@ async def get_weather(message: types.Message):
             air_quality_text = str(air_quality_points) + ' (Воздух средней чистоты)'
         else:
             air_quality_text = str(air_quality_points) + ' (Чистый воздух)'
+        #Перевод описания погоды на русский язык
         if weather_description in cloudiness_translation:
             weather_description_ru = cloudiness_translation[weather_description]
         else:
